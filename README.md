@@ -1,8 +1,8 @@
 # yyjson_cpp
 
 
-base project: https://github.com/ibireme/yyjson  
-directory
+Base project: https://github.com/ibireme/yyjson  
+Directory
 - include: source file
 - lib: for windows
 - example: simple mock project
@@ -10,7 +10,7 @@ directory
 ### TODO
 - assertion for invalid use
 
-## example
+## EXAMPLE
 ```c
 // Parsing Test
 {
