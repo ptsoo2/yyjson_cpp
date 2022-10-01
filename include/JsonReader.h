@@ -95,7 +95,7 @@ namespace TSUtil
 	public:
 		bool					parseFromString(const char* str);
 
-	public:
+	protected:
 		docPtr_t				docPtr_;
 	};
 }
