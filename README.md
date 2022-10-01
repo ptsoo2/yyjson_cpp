@@ -9,6 +9,7 @@ Directory
 
 ### TODO
 - assertion for invalid use
+- check function when call write function(type compatible)
 
 ## EXAMPLE
 ```c
