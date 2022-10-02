@@ -79,7 +79,7 @@ namespace TSUtil
 	};
 
 	class CMutableJsonObject;
-	class CMutableJsonArray : CMutableJsonValue
+	class CMutableJsonArray : private CMutableJsonValue
 	{
 	public:
 		CMutableJsonArray(CJsonWriter& writer, yyjson_mut_val* val);
@@ -96,7 +96,7 @@ namespace TSUtil
 		}
 	};
 
-	class CMutableJsonObject : CMutableJsonValue
+	class CMutableJsonObject : private CMutableJsonValue
 	{
 	public:
 		CMutableJsonObject(CJsonWriter& writer, yyjson_mut_val* val);

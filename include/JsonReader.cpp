@@ -34,7 +34,7 @@ namespace TSUtil
 	{
 	}
 
-	yyjson_val* CJsonObject::_cacheAndGet(const char* key) const
+	auto CJsonObject::_cacheAndGet(const char* key) const -> const lstDuplicateValue_t*
 	{
 		if ((val_ == nullptr) || (key == nullptr))
 			return nullptr;
@@ -44,14 +44,42 @@ namespace TSUtil
 		// cache hit
 		auto findIter = mapValue_.find(hashValue);
 		if (findIter != mapValue_.end())
-			return findIter->second;
+			return &(findIter->second);
 
-		auto rawObj = yyjson_obj_get(val_, key);
-		if (rawObj == nullptr)
-			return nullptr;
+		// cache miss
+		findIter = mapValue_.emplace(hashValue, _getValueList(key)).first;
+		return &(findIter->second);
+	}
 
-		mapValue_.emplace(hashValue, rawObj);
-		return rawObj;
+	auto CJsonObject::_getValueList(std::string_view key) const -> lstDuplicateValue_t
+	{
+		lstDuplicateValue_t lstDuplicateValue;
+		const size_t max = yyjson_obj_size(val_);
+		if (max < 1)
+		{
+			return lstDuplicateValue;
+		}
+
+		lstDuplicateValue.reserve(max);
+
+		const size_t keyLen = key.length();
+		const uint64_t tag = (keyLen << YYJSON_TAG_BIT) | YYJSON_TYPE_STR;
+
+		yyjson_val* yyKey = unsafe_yyjson_get_first(val_);
+		yyjson_val* yyVal = yyKey + 1;
+
+		for (size_t i = 0; i < max; ++i)
+		{
+			if ((yyKey->tag == tag) && (memcmp(yyKey->uni.ptr, (void*)key.data(), keyLen) == 0))
+			{
+				lstDuplicateValue.emplace_back(yyVal);
+			}
+
+			yyKey = unsafe_yyjson_get_next(yyVal);
+			yyVal = yyKey + 1;
+		}
+
+		return lstDuplicateValue;
 	}
 
 	CJsonArray::CJsonArray(yyjson_val* val)

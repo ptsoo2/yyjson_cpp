@@ -26,6 +26,7 @@ namespace TSUtil
 		int64_t					getInt64() const { return yyjson_get_sint(val_); }
 		uint64_t				getUInt64() const { return yyjson_get_uint(val_); }
 		double					getDouble() const { return yyjson_get_real(val_); }
+		bool					getBool() const { return yyjson_get_bool(val_); }
 		CJsonArray				getArray() const;
 		CJsonObject				getObject() const;
 
@@ -36,6 +37,7 @@ namespace TSUtil
 		bool					isInt64() const { return yyjson_is_sint(val_); }
 		bool					isUInt64() const { return yyjson_is_uint(val_); }
 		bool					isDouble() const { return yyjson_is_real(val_); }
+		bool					isBool() const { return yyjson_is_bool(val_); }
 
 	protected:
 		yyjson_val*				val_;
@@ -50,6 +52,7 @@ namespace TSUtil
 		CJsonArray(CJsonArray&& rhs);
 
 	public:
+		const CJsonValue*		at(size_t idx) const { return idx >= lstJsonValue_.size() ? nullptr : &(lstJsonValue_.at(idx)); }
 		size_t					size() const { return lstJsonValue_.size(); }
 
 		template<typename TFn>
@@ -63,20 +66,22 @@ namespace TSUtil
 		lstJsonValue_t			lstJsonValue_;
 	};
 
-	class CJsonObject : public CJsonValue
+	class CJsonObject : private CJsonValue
 	{
-		using mapValue_t = std::map<std::size_t /* hashValue */, yyjson_val*>;
+		using lstDuplicateValue_t = std::vector<CJsonValue>;
+		using mapValue_t = std::map<std::size_t /* hashValue */, lstDuplicateValue_t>;
 
 	public:
 		CJsonObject(yyjson_val* val);
 		CJsonObject(CJsonObject&& rhs);
 
 	public:
-		CJsonValue				operator[](const char* key) const { return _cacheAndGet(key); }
+		auto					operator[](const char* key) const -> const lstDuplicateValue_t* { return _cacheAndGet(key); }
 		bool					hasMember(const char* name) const { return _cacheAndGet(name) != nullptr; }
 
 	protected:
-		yyjson_val*				_cacheAndGet(const char* key) const;
+		auto					_cacheAndGet(const char* key) const -> const lstDuplicateValue_t*;
+		lstDuplicateValue_t		_getValueList(std::string_view key) const;
 
 	protected:
 		yyjson_val*				val_;
