@@ -43,26 +43,28 @@ namespace TSUtil
 		yyjson_val*				val_;
 	};
 
-	class CJsonArray
+	class CJsonArray : private CJsonValue
 	{
 		using lstJsonValue_t = std::vector<CJsonValue>;
+		using fnForeach_t = std::function<void(const CJsonValue&)>;
 
 	public:
 		CJsonArray(yyjson_val* val);
 		CJsonArray(CJsonArray&& rhs);
 
 	public:
-		const CJsonValue*		at(size_t idx) const { return idx >= lstJsonValue_.size() ? nullptr : &(lstJsonValue_.at(idx)); }
+		const CJsonValue*		at(size_t idx);
+		const CJsonValue*		operator[](size_t idx) { return at(idx); }
 		size_t					size() const { return lstJsonValue_.size(); }
+		bool					empty() const { return lstJsonValue_.empty() == true; }
 
-		template<typename TFn>
-		void					for_each(TFn&& fn) const
-		{
-			for (const auto& val : lstJsonValue_)
-				fn(val);
-		}
+		void					for_each(fnForeach_t&& fn);
 
 	protected:
+		void					_caching();
+
+	protected:
+		bool					isCached_;
 		lstJsonValue_t			lstJsonValue_;
 	};
 
@@ -76,16 +78,16 @@ namespace TSUtil
 		CJsonObject(CJsonObject&& rhs);
 
 	public:
-		auto					operator[](const char* key) const -> const lstDuplicateValue_t* { return _cacheAndGet(key); }
-		bool					hasMember(const char* name) const { return _cacheAndGet(name) != nullptr; }
+		auto					operator[](const char* key) -> const lstDuplicateValue_t* { return _cacheAndGet(key); }
+		bool					hasMember(const char* name) { return _cacheAndGet(name) != nullptr; }
 
 	protected:
-		auto					_cacheAndGet(const char* key) const -> const lstDuplicateValue_t*;
-		lstDuplicateValue_t		_getValueList(std::string_view key) const;
+		void					_caching();
+		auto					_cacheAndGet(const char* key) -> const lstDuplicateValue_t*;
 
 	protected:
-		yyjson_val*				val_;
-		mutable mapValue_t		mapValue_;
+		bool					isCached_;
+		mapValue_t				mapValue_;
 	};
 
 	class CJsonReader : public CJsonValue
