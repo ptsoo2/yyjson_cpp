@@ -13,8 +13,17 @@ Directory
 
 ## EXAMPLE
 ```c
-// Parsing Test
+const char* script = R"(
+{ 
+	"1": 123,
+	"1": 456,
+	"2": [222, "hmm", 444]
+}
+)";
+
 {
+	log("Reader Test ====================================");
+
 	CJsonReader reader;
 	if (reader.parseFromString(script) == false)
 	{
@@ -25,32 +34,37 @@ Directory
 	CJsonObject obj = reader.getObject();
 	if (obj.hasMember("1") == true)
 	{
-		log("%llu", obj["1"].getInt64());
-		log("%llu", obj["1"].getInt64());
-		log("%llu", obj["1"].getInt64());
-		log("%llu", obj["1"].getInt64());
+		const auto lstValue = obj["1"];
+		for (const auto& val : *lstValue)
+		{
+			log("1 - %llu", val.getInt64());
+		}
 	}
 	if (obj.hasMember("2") == true)
 	{
-		CJsonValue val = obj["2"];
-		if (val.isArray() == true)
+		const auto lstValue = obj["2"];
+		for (const auto& val : *lstValue)
 		{
-			CJsonArray arr = val.getArray();
-			arr.for_each(
-				[](const CJsonValue& val)
-				{
-					if (val.isString() == true)
-						log("%s", val.getString());
-					else if(val.isNumber() == true)
-						log("%lld", val.getUInt64());
-				}
-			);
+			if (val.isArray() == true)
+			{
+				CJsonArray arr = val.getArray();
+				arr.for_each(
+					[](const CJsonValue& val)
+					{
+						if (val.isString() == true)
+							log("2 - %s", val.getString());
+						else if (val.isNumber() == true)
+							log("2 - %lld", val.getUInt64());
+					}
+				);
+			}
 		}
 	}
 }
 
-// Writer Test - Root Object
 {
+	log("Writer Test - Object ===========================");
+
 	CJsonWriter jsonWriter;
 	CMutableJsonObject rootObj = jsonWriter.getRootObject();
 
@@ -77,23 +91,76 @@ Directory
 	rootObj.getArray("123111111123")
 		.write("1231312");
 
-	log("%s", jsonWriter.getstdString(true).c_str());
+	log("%s", jsonWriter.getString(true));
 }
 
-// Writer Test - Root Array
 {
+	log("Writer Test - Array ===========================");
+
 	CJsonWriter jsonWriter;
 	CMutableJsonArray rootArr = jsonWriter.getRootArray();
-	rootArr.write(false);
-	float test = 1.1f;
-	rootArr.write(test);
-	rootArr.getArray().write(true);
-	rootArr.getObject().write("1231231", 123123);
-	rootArr.getObject().write("1231211232112", true);
+	rootArr
+		.write(false)
+		.write(1.1111f);
+	
+	rootArr.getArray()
+		.write(true);
+	
+	rootArr.getObject()
+		.write("1231231", 123123)
+		.write("1231211232112", true);
 
 	rootArr.write("123123");
+	
 	std::string test2{ "!23123" };
 	rootArr.write(test2);
 
-	log("%s", jsonWriter.getstdString(true).c_str());
+	log("%s", jsonWriter.getString(true));
 }
+```
+## OUTPUT
+```c
+Reader Test ====================================
+1 - 123
+1 - 456
+2 - 222
+2 - hmm
+2 - 444
+Writer Test - Object ===========================
+{
+    "123123": false,
+    "123123": true,
+    "123123": "123123",
+    "123111111123": [
+        "1231312",
+        "1.111f",
+        true,
+        1231231123123
+    ],
+    "12312313212": {
+        "a": "1231312",
+        "b": "1.111f",
+        "c": true,
+        "d": 1231231123123
+    },
+    "123111111123": [
+        "1231312"
+    ],
+    "123111111123": [
+        "1231312"
+    ]
+}
+Writer Test - Array ===========================
+[
+    false,
+    1.1110999584197998,
+    [
+        true
+    ],
+    {
+        "1231231": 123123,
+        "1231211232112": true
+    },
+    "123123",
+    "!23123"
+]
