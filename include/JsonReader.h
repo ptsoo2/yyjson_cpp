@@ -78,16 +78,16 @@ namespace TSUtil
 		CJsonObject(CJsonObject&& rhs);
 
 	public:
-		auto					operator[](const char* key) -> const lstDuplicateValue_t* { return _cacheAndGet(key); }
-		bool					hasMember(const char* name) { return _cacheAndGet(name) != nullptr; }
+		auto					operator[](std::string_view key) const -> const lstDuplicateValue_t* { return _cacheAndGet(key); }
+		bool					hasMember(std::string_view name) const { return _cacheAndGet(name) != nullptr; }
 
 	protected:
-		void					_caching();
-		auto					_cacheAndGet(const char* key) -> const lstDuplicateValue_t*;
+		void					_caching() const;
+		auto					_cacheAndGet(std::string_view key) const -> const lstDuplicateValue_t*;
 
 	protected:
-		bool					isCached_;
-		mapValue_t				mapValue_;
+		mutable bool			isCached_;
+		mutable mapValue_t		mapValue_;
 	};
 
 	class CJsonReader : public CJsonValue
@@ -100,7 +100,7 @@ namespace TSUtil
 		CJsonReader(CJsonReader&& rhs);
 
 	public:
-		bool					parseFromString(const char* str);
+		bool					parseFromString(std::string_view str);
 
 	protected:
 		docPtr_t				docPtr_;

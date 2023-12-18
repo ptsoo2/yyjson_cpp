@@ -1,5 +1,4 @@
-#include "stdafx.h"
-#include "JsonReader.h"
+#include "JsonWrapper.h"
 
 namespace TSUtil
 {
@@ -38,7 +37,7 @@ namespace TSUtil
 		rhs.isCached_ = false;
 	}
 
-	void CJsonObject::_caching()
+	void CJsonObject::_caching() const
 	{
 		if (isCached_ == true)
 			return;
@@ -72,16 +71,16 @@ namespace TSUtil
 		isCached_ = true;
 	}
 
-	auto CJsonObject::_cacheAndGet(const char* key) -> const lstDuplicateValue_t*
+	auto CJsonObject::_cacheAndGet(std::string_view key) const -> const lstDuplicateValue_t*
 	{
-		if ((val_ == nullptr) || (key == nullptr))
+		if ((val_ == nullptr) || (key.empty() == true))
 			return nullptr;
 
 		const auto hashValue = std::hash<std::string_view>()(key);
 
 		_caching();
 		
-		auto findIter = mapValue_.find(hashValue);
+		const auto findIter = mapValue_.find(hashValue);
 		return findIter == mapValue_.end() ? nullptr : &(findIter->second);	// cache hit
 	}
 
@@ -150,12 +149,17 @@ namespace TSUtil
 	{
 	}
 
-	bool CJsonReader::parseFromString(const char* str)
+	bool CJsonReader::parseFromString(std::string_view str)
 	{
-		if (str == nullptr)
+		if (str.empty() == true)
 			return false;
 
-		yyjson_doc* rawDoc = yyjson_read(str, strlen(str), 0);
+		const char* data = str.data();
+
+		if (data == nullptr)
+			return false;
+
+		yyjson_doc* rawDoc = yyjson_read(data, str.length(), 0);
 		if (rawDoc == nullptr)
 			return false;
 

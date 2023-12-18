@@ -18,59 +18,48 @@ namespace TSUtil
 		yyjson_mut_doc*			_getDocument() const;
 
 		// signed integer
-		template<typename TValue, typename TDecayValue = std::decay_t<TValue>, typename std::enable_if_t<
-			std::is_floating_point_v<TDecayValue> == false
-				&& std::is_arithmetic_v<TDecayValue> == true
-				&& std::is_unsigned_v<TDecayValue> == false
-		, int> = 0>
-		void					_write(const char* key, TValue&& value) 
+		template<SignedIntegerTrait TValue>
+		void					_write(std::string_view key, TValue&& value) 
 		{
 			if (key == nullptr)		yyjson_mut_arr_add_sint(_getDocument(), val_, value);
-			else					yyjson_mut_obj_add_sint(_getDocument(), val_, key, value);
+			else					yyjson_mut_obj_add_sint(_getDocument(), val_, key.data(), value);
 		}
 
 		// unsigned integer
-		template<typename TValue, typename TDecayValue = std::decay_t<TValue>, typename std::enable_if_t<
-			std::is_floating_point_v<TDecayValue> == false 
-				&& std::is_arithmetic_v<TDecayValue> == true 
-				&& std::is_unsigned_v<TDecayValue> == true
-		, int> = 0>
-		void					_write(const char* key, TValue&& value)
+		template<UnSignedIntegerTrait TValue>
+		void					_write(std::string_view key, TValue&& value)
 		{
 			if (key == nullptr)		yyjson_mut_arr_add_uint(_getDocument(), val_, value);
-			else					yyjson_mut_obj_add_uint(_getDocument(), val_, key, value);
+			else					yyjson_mut_obj_add_uint(_getDocument(), val_, key.data(), value);
 		}
 		
 		// float / double
-		template<typename TValue, typename TDecayValue = std::decay_t<TValue>, typename std::enable_if_t<
-			std::is_floating_point_v<TDecayValue> == true
-				&& std::is_arithmetic_v<TDecayValue> == true
-		, int> = 0>
-		void					_write(const char* key, TValue&& value) 
+		template<FloatingPointTrait TValue>
+		void					_write(std::string_view key, TValue&& value)
 		{
 			if (key == nullptr)		yyjson_mut_arr_add_real(_getDocument(), val_, value);
-			else					yyjson_mut_obj_add_real(_getDocument(), val_, key, value);
+			else					yyjson_mut_obj_add_real(_getDocument(), val_, key.data(), value);
 		}
 
 		// const char*
-		void					_write(const char* key, const char* value) 
+		void					_write(std::string_view key, const char* value)
 		{
 			if (key == nullptr)		yyjson_mut_arr_add_strcpy(_getDocument(), val_, value);
-			else					yyjson_mut_obj_add_strcpy(_getDocument(), val_, key, value);
+			else					yyjson_mut_obj_add_strcpy(_getDocument(), val_, key.data(), value);
 		}
 
 		// std::string
-		void					_write(const char* key, const std::string& value) 
+		void					_write(std::string_view key, const std::string& value)
 		{
 			if (key == nullptr)		yyjson_mut_arr_add_strncpy(_getDocument(), val_, value.c_str(), value.size());
-			else					yyjson_mut_obj_add_strncpy(_getDocument(), val_, key, value.c_str(), value.size());
+			else					yyjson_mut_obj_add_strncpy(_getDocument(), val_, key.data(), value.c_str(), value.size());
 		}
 
 		// bool
-		void					_write(const char* key, bool value) 
+		void					_write(std::string_view key, bool value)
 		{
 			if (key == nullptr)		yyjson_mut_arr_add_bool(_getDocument(), val_, value);
-			else					yyjson_mut_obj_add_bool(_getDocument(), val_, key, value);
+			else					yyjson_mut_obj_add_bool(_getDocument(), val_, key.data(), value);
 		}
 
 	protected:
@@ -102,11 +91,11 @@ namespace TSUtil
 		CMutableJsonObject(CJsonWriter& writer, yyjson_mut_val* val);
 
 	public:
-		CMutableJsonArray		getArray(const char* key) const;
-		CMutableJsonObject		getObject(const char* key) const;
+		CMutableJsonArray		getArray(std::string_view key) const;
+		CMutableJsonObject		getObject(std::string_view key) const;
 
 		template<typename TValue>
-		CMutableJsonObject&		write(const char* key, TValue&& value)
+		CMutableJsonObject&		write(std::string_view key, TValue&& value)
 		{
 			_write(key, std::forward<TValue>(value));
 			return *this;

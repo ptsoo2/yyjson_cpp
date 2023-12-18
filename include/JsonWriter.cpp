@@ -1,5 +1,4 @@
-#include "stdafx.h"
-#include "JsonWriter.h"
+#include "JsonWrapper.h"
 
 namespace TSUtil
 {
@@ -19,22 +18,20 @@ namespace TSUtil
 	{
 	}
 
-	CMutableJsonArray CMutableJsonObject::getArray(const char * key) const
+	CMutableJsonArray CMutableJsonObject::getArray(std::string_view key) const
 	{
-		// ptsoo todo - experimental
 		yyjson_mut_doc* doc = _getDocument();
 		yyjson_mut_val* val = yyjson_mut_arr(doc);
-		yyjson_mut_obj_add_val(doc, val_, key, val);
+		yyjson_mut_obj_add_val(doc, val_, key.data(), val);
 
 		return { writer_, val };
 	}
 
-	CMutableJsonObject CMutableJsonObject::getObject(const char * key) const
+	CMutableJsonObject CMutableJsonObject::getObject(std::string_view key) const
 	{
-		// ptsoo todo - experimental
 		yyjson_mut_doc* doc = _getDocument();
 		yyjson_mut_val* val = yyjson_mut_obj(doc);
-		yyjson_mut_obj_add_val(doc, val_, key, val);
+		yyjson_mut_obj_add_val(doc, val_, key.data(), val);
 
 		return { writer_, val };
 	}

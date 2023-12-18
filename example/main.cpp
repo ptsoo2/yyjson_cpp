@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "JsonWrapper.h"
 
 template<typename ...TArgs>
 void log(const char* format, TArgs... args)
