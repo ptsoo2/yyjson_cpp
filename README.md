@@ -1,7 +1,7 @@
 # yyjson_cpp
 
 
-Base project: https://github.com/ibireme/yyjson  
+Base project: https://github.com/ibireme/yyjson
 Directory
 - include: source file
 - lib: for windows
