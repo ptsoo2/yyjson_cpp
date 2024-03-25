@@ -79,9 +79,11 @@ namespace TSUtil
 		const auto hashValue = std::hash<std::string_view>()(key);
 
 		_caching();
-		
+
 		const auto findIter = mapValue_.find(hashValue);
-		return findIter == mapValue_.end() ? nullptr : &(findIter->second);	// cache hit
+		return (findIter == mapValue_.end())
+			? nullptr
+			: &(findIter->second);	// cache hit
 	}
 
 	CJsonArray::CJsonArray(yyjson_val* val)
@@ -102,7 +104,9 @@ namespace TSUtil
 	const CJsonValue* CJsonArray::at(size_t idx)
 	{
 		_caching();
-		return idx >= lstJsonValue_.size() ? nullptr : &(lstJsonValue_.at(idx));
+		return (idx >= lstJsonValue_.size())
+			? nullptr 
+			: &(lstJsonValue_.at(idx));
 	}
 
 	void CJsonArray::for_each(fnForeach_t&& fn)

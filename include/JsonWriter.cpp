@@ -1,4 +1,5 @@
 #include "JsonWrapper.h"
+#include <stdexcept>
 
 namespace TSUtil
 {
@@ -76,9 +77,9 @@ namespace TSUtil
 
 		if (isDirty_ == true)
 		{
-			const yyjson_write_flag writeFlag = isDebug == true ?
-				YYJSON_WRITE_PRETTY :	// 디버그면 이쁘게
-				YYJSON_WRITE_NOFLAG;	// 아니면 짧게
+			const yyjson_write_flag writeFlag = (isDebug == true)
+				? YYJSON_WRITE_PRETTY	// 디버그면 이쁘게
+				: YYJSON_WRITE_NOFLAG;	// 아니면 짧게
 
 			char* json = yyjson_mut_write(docPtr_.get(), writeFlag, nullptr);
 			if (json != nullptr)
@@ -99,20 +100,26 @@ namespace TSUtil
 
 	CMutableJsonObject CJsonWriter::getRootObject()
 	{
-		yyjson_mut_doc* mutDoc = _getDocument();
-		yyjson_mut_val* root = yyjson_mut_obj(mutDoc);
+		if (rootVal_ != nullptr)
+			throw std::runtime_error("Root object is already setting.");
 
-		yyjson_mut_doc_set_root(mutDoc, root);
-		return { *this, root };
+		yyjson_mut_doc* mutDoc = _getDocument();
+		rootVal_ = yyjson_mut_obj(mutDoc);
+
+		yyjson_mut_doc_set_root(mutDoc, rootVal_);
+		return { *this, rootVal_ };
 	}
 
 	CMutableJsonArray CJsonWriter::getRootArray()
 	{
-		yyjson_mut_doc* mutDoc = _getDocument();
-		yyjson_mut_val* root = yyjson_mut_arr(mutDoc);
+		if (rootVal_ != nullptr)
+			throw std::runtime_error("Root array is already setting.");
 
-		yyjson_mut_doc_set_root(mutDoc, root);
-		return { *this, root };
+		yyjson_mut_doc* mutDoc = _getDocument();
+		rootVal_ = yyjson_mut_arr(mutDoc);
+
+		yyjson_mut_doc_set_root(mutDoc, rootVal_);
+		return { *this, rootVal_ };
 	}
 
 	yyjson_mut_doc* CJsonWriter::_getDocument() const

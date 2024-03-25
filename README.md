@@ -6,11 +6,6 @@
 ### Content
 - yyjson 의 cpp wrapper
 
-### TODO
-- 잘못된 사용에 대한 assert 보강 필요
-- write 함수 사용시 의도와 다르게 사용되는 경우 있는지 테스트 필요
-- yyjson 버전업 이후 인터페이스 대응 필요
-
 ## EXAMPLE
 ```c
 #include <stdio.h>
